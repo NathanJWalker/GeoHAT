@@ -13,6 +13,14 @@
 #  
 # June 14, 2012
 # John.Fay@duke.edu
+#
+# Edits: Nathan Walker
+# July 5, 2016
+# Corrected error in how centrality attributes calculated
+# Removed Eigenvector Centrality (prone to error messages for many graphs)
+# Added Degree Centrality (included in code before, but not written to final table)
+# Made area measurements in decimals
+#
 #---------------------------------------------------------------------------------
 
 # Import system modules
@@ -40,11 +48,11 @@ def msg(txt): print txt; arcpy.AddMessage(txt); return
 # Create a list of patch IDs and a dictionary of areas
 msg("Creating list of patch areas")
 patchAreas = {}
-cellSize2HA = (arcpy.Raster(patchRaster).meanCellWidth ** 2) / 10000
+cellSize2HA = (arcpy.Raster(patchRaster).meanCellWidth ** 2) / 10000.0
 rows = arcpy.SearchCursor(patchRaster)
 row = rows.next()
 while row:
-    patchAreas[row.VALUE] = round(row.COUNT * cellSize2HA)
+    patchAreas[row.VALUE] = row.COUNT * cellSize2HA
     row = rows.next()
 del row, rows
 patchIDs = patchAreas.keys()
@@ -72,7 +80,6 @@ msg("There graph contains %d subgraph(s)" %len(subGs))
 dG = {}
 bG = {}
 cG = {}
-eG = {}
 for subG in subGs:
     #msg("Calculating degree centrality...")
     dG.update(nx.centrality.degree_centrality(subG))
@@ -80,19 +87,17 @@ for subG in subGs:
     bG.update(nx.centrality.betweenness_centrality(subG,normalized=True,weight='weight'))
     #msg("Calculating closeness centrality...")
     cG.update(nx.centrality.closeness_centrality(subG,normalized=True,distance='weight'))
-    #msg("Calculating closeness centrality...")
-    eG.update(nx.centrality.eigenvector_centrality(subG))
 
 # Create the output file
 msg("Writing outputs to %s" %outputFN)
 connAreaFileObj = open(outputFN, 'w')
-connAreaFileObj.write("patchID, connectedArea, idwArea, degree, betweenness, closeness, eigenvector\n")
+connAreaFileObj.write("patchID, connectedArea, idwArea, degree, betweenness, closeness, degreeCen\n")
 
 # Loop through patch IDs
 for patchID in patchIDs:
     if not patchID in G.nodes():
         msg("Patch #%d is isolated" %patchID)
-        connAreaFileObj.write("%d, 0, 0, 0, 0, 0, 0\n" %patchID)
+        connAreaFileObj.write("%d, 0.0, 0.0, 0, 0.0, 0.0, 0.0\n" %patchID)
         continue
     # Reset area accumulators
     connArea = 0
@@ -105,19 +110,16 @@ for patchID in patchIDs:
     for toID in edges.keys():
         distance = edges[toID]['weight']
         connArea += patchAreas[toID]
-        idwArea += round(math.exp(k * distance) * patchAreas[toID])
-        degreeN = dG[toID] 
-        between = bG[toID] * 100.0
-        closeness = cG[toID] * 100.0
-        eigenvector = eG[toID] * 100.0
+        idwArea += math.exp(k * distance) * patchAreas[toID]
+    between = bG[patchID] * 100.0
+    closeness = cG[patchID] * 100.0
+    degreeN = dG[patchID] * 100.0
+
     # Write values to the file
-    connAreaFileObj.write("%d, %d, %d, %d, %2.4f, %2.4f, %2.4f\n"
-                          %(patchID, connArea, idwArea, degree, between, closeness, eigenvector))
+    connAreaFileObj.write("%d, %2.4f, %2.4f, %d, %2.4f, %2.4f, %2.4f\n"
+                          %(patchID, connArea, idwArea, degree, between, closeness, degreeN))
 
 # Close the text file
 connAreaFileObj.close()
 
-
-    
-
-
+arcpy.CheckInExtension("spatial")
