@@ -76,7 +76,7 @@ edgeList.close()
 
 # Calculate degree, betweenness, and closeness centrality - one subgraph at time
 subGs = nx.connected_component_subgraphs(G)
-msg("There graph contains %d subgraph(s)" %len(subGs))
+msg("The graph contains %d subgraph(s)" %len(subGs))
 dG = {}
 bG = {}
 cG = {}
