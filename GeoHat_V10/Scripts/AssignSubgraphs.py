@@ -4,6 +4,7 @@
 # Create edge list with subgraph assignments, for given threshold distance
 #
 # Requires: NetworkX to be stored in script folder (or installed)
+# Create Edge List tool must be run first
 #
 # Inputs: <Patch raster> <edge list> <maxDistance>
 # Output: <Patch connected attribute table (CSV format)>
