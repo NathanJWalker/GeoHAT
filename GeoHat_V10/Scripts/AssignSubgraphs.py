@@ -6,7 +6,7 @@
 # Requires: NetworkX to be stored in script folder (or installed)
 # Create Edge List tool must be run first
 #
-# Inputs: <Patch raster> <edge list> <maxDistance>
+# Inputs: <edge list> <maxDistance>
 # Output: <Patch connected attribute table (CSV format)>
 #  
 # August 5, 2016
@@ -25,7 +25,6 @@ arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
 
 # Input variables
-patchRaster = sys.argv[1]   
 edgeListFN = sys.argv[2]    
 maxDistance = int(sys.argv[3])
 k = math.log(0.1) / maxDistance ##Decay coefficient
