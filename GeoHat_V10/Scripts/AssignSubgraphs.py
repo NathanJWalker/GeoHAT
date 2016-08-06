@@ -25,12 +25,12 @@ arcpy.CheckOutExtension("spatial")
 arcpy.env.overwriteOutput = True
 
 # Input variables
-edgeListFN = sys.argv[2]    
-maxDistance = int(sys.argv[3])
+edgeListFN = sys.argv[1]    
+maxDistance = int(sys.argv[2])
 k = math.log(0.1) / maxDistance ##Decay coefficient
 
 # Output variables
-outputFN = sys.argv[4]   
+outputFN = sys.argv[3]   
 
 ##---FUNCTIONS---
 # Message management
